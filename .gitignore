@@ -167,3 +167,4 @@ inmana-*.tar
 **/priv/static/
 
 .pgdata
+*.sqlite
