@@ -3,7 +3,7 @@ export default function convertDurationToTimeString(duration: number) {
   const minutes = Math.floor((duration % 3600) / 60);
   const seconds = duration % 60;
 
-  return [hours, seconds, minutes]
+  return [hours, minutes, seconds]
     .map((unit) => {
       return String(unit).padStart(2, '0');
     })
