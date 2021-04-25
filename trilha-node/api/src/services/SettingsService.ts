@@ -9,22 +9,30 @@ type SettingsServiceCreateParams = {
 export class SettingsService {
   private settingsRepository: SettingsRepository;
 
-  async create({ chat, username }: SettingsServiceCreateParams) {
+  async save({ chat, username }: SettingsServiceCreateParams) {
     this.settingsRepository = getCustomRepository(SettingsRepository);
 
-    const usernameAlreadyExists = await this.settingsRepository.findOne({
+    let settings = await this.settingsRepository.findOne({
       username,
     });
-    if (usernameAlreadyExists) {
-      throw new Error('User already exists!');
+    if (!settings) {
+      settings = this.settingsRepository.create({
+        username,
+        chat,
+      });
+    } else {
+      settings.chat = chat;
     }
 
-    const settings = this.settingsRepository.create({
-      username,
-      chat,
-    });
-
     await this.settingsRepository.save(settings);
+
+    return settings;
+  }
+
+  async findByUsername(username: string) {
+    this.settingsRepository = getCustomRepository(SettingsRepository);
+
+    const settings = await this.settingsRepository.findOne({ username });
 
     return settings;
   }
