@@ -1,4 +1,5 @@
-import { getCustomRepository } from 'typeorm';
+import { getCustomRepository, QueryBuilder } from 'typeorm';
+import { Connection } from '../entities/connection';
 import { ConnectionsRepository } from '../repositories/ConnectionsRepository';
 import { MessagesRepository } from '../repositories/MessagesRepository';
 
@@ -40,5 +41,36 @@ export class ConnectionsService {
     });
 
     return connection;
+  }
+
+  async findAllWithoutAdmin() {
+    this.connectionsRepository = getCustomRepository(ConnectionsRepository);
+
+    const connections = await this.connectionsRepository.find({
+      where: { admin_id: null },
+      relations: ['user'],
+    });
+
+    return connections;
+  }
+
+  async findBySocketID(socket_id: string) {
+    this.connectionsRepository = getCustomRepository(ConnectionsRepository);
+
+    const connection = await this.connectionsRepository.findOne({
+      where: { socket_id },
+      relations: ['user'],
+    });
+
+    return connection;
+  }
+
+  async updateAdminID(user_id: string, admin_id: string) {
+    await this.connectionsRepository
+      .createQueryBuilder()
+      .update(Connection)
+      .set({ admin_id })
+      .where('user_id = :user_id', { user_id })
+      .execute();
   }
 }
