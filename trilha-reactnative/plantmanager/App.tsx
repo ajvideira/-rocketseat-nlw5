@@ -5,6 +5,7 @@ import {
 } from '@expo-google-fonts/jost';
 import AppLoading from 'expo-app-loading';
 import React from 'react';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Routes from './src/routes';
 
 export default function App() {
@@ -13,5 +14,11 @@ export default function App() {
     Jost_600SemiBold,
   });
 
-  return fontsLoaded ? <Routes /> : <AppLoading />;
+  return fontsLoaded ? (
+    <SafeAreaProvider>
+      <Routes />
+    </SafeAreaProvider>
+  ) : (
+    <AppLoading />
+  );
 }
