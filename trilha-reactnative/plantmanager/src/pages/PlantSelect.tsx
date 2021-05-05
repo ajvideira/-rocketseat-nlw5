@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/core';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -13,6 +14,7 @@ import { EnvironmentButton } from '../components/EnvironmentButton';
 import { Header } from '../components/Header';
 import { Load } from '../components/Load';
 import { PlantCardPrimary } from '../components/PlantCardPrimary';
+import { Plant } from '../libs/storage';
 import api from '../services/api';
 import colors from '../styles/colors';
 import fonts from '../styles/fonts';
@@ -20,19 +22,6 @@ import fonts from '../styles/fonts';
 type Environment = {
   key: string;
   title: string;
-};
-
-type Plant = {
-  id: string;
-  name: string;
-  about: string;
-  water_tips: string;
-  photo: string;
-  environments: [string];
-  frequency: {
-    times: number;
-    repeat_every: string;
-  };
 };
 
 export function PlantSelect() {
@@ -43,6 +32,8 @@ export function PlantSelect() {
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  const navigation = useNavigation();
 
   if (loading && plants.length > 0 && environments.length > 0) {
     setLoading(false);
@@ -112,6 +103,10 @@ export function PlantSelect() {
     }
   }
 
+  function handlePlantSelect(plant: Plant) {
+    navigation.navigate('PlantSave', { plant });
+  }
+
   return loading ? (
     <Load />
   ) : (
@@ -124,6 +119,7 @@ export function PlantSelect() {
       <View>
         <FlatList
           data={environments}
+          keyExtractor={(item) => item.key}
           renderItem={({ item }) => (
             <EnvironmentButton
               active={item.key === environmentSelected}
@@ -141,8 +137,15 @@ export function PlantSelect() {
       <View style={styles.plantList}>
         <FlatList
           data={filteredPlants}
-          renderItem={({ item }) => <PlantCardPrimary data={item} />}
-          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <PlantCardPrimary
+              onPress={() => {
+                handlePlantSelect(item);
+              }}
+              data={item}
+            />
+          )}
+          keyExtractor={(item) => String(item.id)}
           showsVerticalScrollIndicator={false}
           numColumns={2}
           onEndReachedThreshold={0.1}
@@ -162,6 +165,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    paddingTop: 50,
   },
   header: {
     paddingHorizontal: 30,

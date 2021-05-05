@@ -1,6 +1,8 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/core';
 import React, { useState } from 'react';
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -20,8 +22,21 @@ export function UserIdentification() {
 
   const navigation = useNavigation();
 
-  function handleConfirmar() {
-    navigation.navigate('Confirmation');
+  async function handleConfirmation() {
+    if (!name) {
+      return Alert.alert('Informe seu nome, por favor. 😥');
+    }
+
+    await AsyncStorage.setItem('@plantmanager:user', name);
+
+    navigation.navigate('Confirmation', {
+      title: 'Prontinho',
+      subtitle:
+        'Agora vamos começar a cuidar das suas plantinhas com muito cuidado.',
+      icon: 'smile',
+      buttonText: 'Começar',
+      nextPage: 'PlantSelect',
+    });
   }
 
   function handleFocus() {
@@ -64,7 +79,7 @@ export function UserIdentification() {
             />
 
             <View style={styles.footer}>
-              <Button title="Confirmar" onPressOut={handleConfirmar} />
+              <Button title="Confirmar" onPressOut={handleConfirmation} />
             </View>
           </View>
         </View>
