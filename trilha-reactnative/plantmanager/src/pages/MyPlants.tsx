@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../components/Header';
 import colors from '../styles/colors';
 
 import waterdropImg from '../assets/waterdrop.png';
-import { loadPlants, Plant } from '../libs/storage';
+import { loadPlants, Plant, removePlant } from '../libs/storage';
 import { formatDistance } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import fonts from '../styles/fonts';
 import { PlantCardSecondary } from '../components/PlantCardSecondary';
+import { Load } from '../components/Load';
 
 export function MyPlants() {
   const [plants, setPlants] = useState<Plant[]>([]);
@@ -21,21 +22,54 @@ export function MyPlants() {
       const storagePlants = await loadPlants();
       setPlants(storagePlants);
 
-      if (storagePlants) {
-        const nextTime = formatDistance(
-          new Date(storagePlants[0].dateTimeNotification).getTime(),
-          new Date().getTime(),
-          { locale: ptBR }
-        );
-
-        setNextWatered(`Regue sua ${storagePlants[0].name} 
-        daqui a ${nextTime}.`);
-      }
       setLoading(false);
     })();
   }, []);
 
-  return (
+  useEffect(() => {
+    if (plants.length) {
+      const nextTime = formatDistance(
+        new Date(plants[0].dateTimeNotification).getTime(),
+        new Date().getTime(),
+        { locale: ptBR }
+      );
+
+      setNextWatered(`Regue sua ${plants[0].name} daqui a ${nextTime}.`);
+    } else {
+      setNextWatered('Nenhuma planta cadastrada.');
+    }
+  }, [plants]);
+
+  async function handleRemovePlant(plant: Plant) {
+    try {
+      Alert.alert(
+        'Remover planta',
+        `Tem certeza que deseja remover ${plant.name}?`,
+        [
+          {
+            text: 'Sim 🥲',
+            onPress: async () => {
+              await removePlant(plant.id);
+              setPlants(plants.filter((p) => p.id !== plant.id));
+            },
+          },
+          {
+            text: 'Não 🙏',
+            style: 'cancel',
+          },
+        ]
+      );
+    } catch (error) {
+      Alert.alert(
+        'Remover planta',
+        'Erro ao remover a sua planta 😥, tente novamente.'
+      );
+    }
+  }
+
+  return loading ? (
+    <Load />
+  ) : (
     <SafeAreaView style={styles.container}>
       <Header />
 
@@ -52,6 +86,9 @@ export function MyPlants() {
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => (
             <PlantCardSecondary
+              handleRemove={() => {
+                handleRemovePlant(item);
+              }}
               data={{ name: item.name, photo: item.photo, hour: item.hour }}
             />
           )}
@@ -89,7 +126,9 @@ const styles = StyleSheet.create({
   spotlightText: {
     flex: 1,
     color: colors.blue,
-    paddingHorizontal: 24,
+    paddingLeft: 24,
+    width: 150,
+    textAlign: 'left',
   },
   plants: {
     flex: 1,

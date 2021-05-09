@@ -7,13 +7,7 @@ import { MyPlants } from '../pages/MyPlants';
 
 const AppTab = createBottomTabNavigator();
 
-type Props = {
-  page?: string;
-};
-
-const AuthRoutes = ({ page }: Props) => {
-  console.log('Page: ', page);
-
+const AuthRoutes = () => {
   return (
     <AppTab.Navigator
       tabBarOptions={{
@@ -21,7 +15,6 @@ const AuthRoutes = ({ page }: Props) => {
         inactiveTintColor: colors.heading,
         labelPosition: 'beside-icon',
         style: {
-          paddingVertical: 20,
           height: 88,
         },
       }}

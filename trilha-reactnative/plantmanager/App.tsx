@@ -8,6 +8,16 @@ import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Routes from './src/routes';
 
+import * as Notifications from 'expo-notifications';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+  }),
+});
+
 export default function App() {
   const [fontsLoaded] = useFonts({
     Jost_400Regular,
